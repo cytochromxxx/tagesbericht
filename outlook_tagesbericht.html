@@ -15,17 +15,17 @@
         theme: {
           extend: {
             colors: {
-              primary: "#8cc63f",
-              "background-light": "#ffffff",
-              "background-dark": "#333333",
-              "surface-light": "#f8f8f8",
-              "surface-dark": "#4a4a4a",
-              "text-light-primary": "#333333",
-              "text-dark-primary": "#f0f0f0",
-              "text-light-secondary": "#666666",
-              "text-dark-secondary": "#b0b0b0",
-              "border-light": "#e0e0e0",
-              "border-dark": "#5a5a5a",
+              primary: "#005a2d",
+              "background-light": "#f0f2f5",
+              "background-dark": "#1a1a1a",
+              "surface-light": "#ffffff",
+              "surface-dark": "#2a2a2a",
+              "text-light-primary": "#212529",
+              "text-dark-primary": "#e9ecef",
+              "text-light-secondary": "#6c757d",
+              "text-dark-secondary": "#adb5bd",
+              "border-light": "#dee2e6",
+              "border-dark": "#495057",
             },
             fontFamily: {
               sans: ["Open Sans", "sans-serif"],
@@ -202,14 +202,10 @@
 <body class="font-sans bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary">
     <div class="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
         <!-- Header -->
-        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-4 border-b border-border-light dark:border-border-dark">
-            <div class="flex items-center space-x-4 mb-4 sm:mb-0">
-                <img alt="Minerva Biolabs Logo" class="h-12 w-auto" src="https://minerva-biolabs.com/img/mb_logo.svg"/>
-            </div>
-            <div class="text-right">
-                <p class="font-semibold text-lg" id="reportDate">Heute</p>
-                <p class="text-text-light-secondary dark:text-text-dark-secondary">Flo Produktion</p>
-            </div>
+        <header class="text-center mb-8 pb-4 border-b border-border-light dark:border-border-dark">
+            <img alt="Minerva Biolabs Logo" class="h-12 w-auto mx-auto mb-4" src="https://minerva-biolabs.com/img/mb_logo.svg"/>
+            <h1 class="text-xl font-semibold text-text-light-primary dark:text-text-dark-primary">Täglicher Arbeitsbericht</h1>
+            <p class="text-lg text-text-light-secondary dark:text-text-dark-secondary" id="reportDate">Heute</p>
         </header>
 
         <!-- Statistik-Übersicht -->
@@ -243,7 +239,7 @@
             <section class="mb-8">
                 <h2 class="text-xl font-bold mb-4 pb-2 border-b border-border-light dark:border-border-dark flex items-center">
                     <span class="material-icons mr-2 text-orange-500">settings</span>
-                    Produktfortschritt
+                    Prozessfortschritt
                 </h2>
                 <div id="products-container"></div>
             </section>

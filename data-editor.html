@@ -15,17 +15,17 @@
         theme: {
           extend: {
             colors: {
-              primary: "#8cc63f",
-              "background-light": "#ffffff",
-              "background-dark": "#333333",
-              "surface-light": "#f8f8f8",
-              "surface-dark": "#4a4a4a",
-              "text-light-primary": "#333333",
-              "text-dark-primary": "#f0f0f0",
-              "text-light-secondary": "#666666",
-              "text-dark-secondary": "#b0b0b0",
-              "border-light": "#e0e0e0",
-              "border-dark": "#5a5a5a",
+              primary: "#005a2d",
+              "background-light": "#f0f2f5",
+              "background-dark": "#1a1a1a",
+              "surface-light": "#ffffff",
+              "surface-dark": "#2a2a2a",
+              "text-light-primary": "#212529",
+              "text-dark-primary": "#e9ecef",
+              "text-light-secondary": "#6c757d",
+              "text-dark-secondary": "#adb5bd",
+              "border-light": "#dee2e6",
+              "border-dark": "#495057",
             },
             fontFamily: {
               sans: ["Open Sans", "sans-serif"],
@@ -48,20 +48,19 @@
 <body class="font-sans bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary">
     <div class="fixed top-4 right-4 z-50 space-x-2">
         <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors" onclick="toggleMode()" id="modeBtn">✏️ Bearbeiten</button>
-        <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors" onclick="exportData()">💾 Export</button>
+        <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors" onclick="exportConfig()">💾 Konfig. exportieren</button>
+        <button class="bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors" onclick="exportToOutlook()">📧 Als E-Mail exportieren</button>
     </div>
 
     <div class="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-4 border-b border-border-light dark:border-border-dark">
             <div class="flex items-center space-x-4 mb-4 sm:mb-0">
-                <img alt="Minerva Biolabs Logo" class="h-16 w-auto" src="https://minerva-biolabs.com/img/mb_logo.svg"/>
-                <div>
-                    <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Täglicher Arbeitsbericht - Editor</p>
-                </div>
+                <img alt="Minerva Biolabs Logo" class="h-12 w-auto" src="https://minerva-biolabs.com/img/mb_logo.svg"/>
+                <h1 class="text-2xl font-semibold text-text-light-primary dark:text-text-dark-primary">Tagesbericht Editor</h1>
             </div>
             <div class="text-right">
                 <p class="font-semibold text-lg" id="reportDate">Heute</p>
-                <p class="text-text-light-secondary dark:text-text-dark-secondary">Flo Produktion</p>
+                <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Abteilung Produktion</p>
             </div>
         </header>
 
@@ -99,9 +98,17 @@
                 <div id="products-container"></div>
                 
                 <div class="text-center mt-6" id="addProductSection" style="display: none;">
-                    <button class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors" onclick="addProduct()">
-                        <span class="material-icons mr-2">add</span>Neues Produkt hinzufügen
-                    </button>
+                    <div class="flex justify-center items-center space-x-4">
+                        <select id="templateSelector" class="border border-border-light rounded px-4 py-3">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                        <button class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors" onclick="addProductFromTemplate()">
+                            <span class="material-icons mr-2">add</span>Produkt aus Vorlage
+                        </button>
+                        <button class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors" onclick="addProduct()">
+                            <span class="material-icons mr-2">note_add</span>Leeres Produkt
+                        </button>
+                    </div>
                 </div>
             </section>
         </main>
@@ -111,6 +118,49 @@
 
     <script>
         let editMode = false;
+
+        const taskTemplates = {
+            "Venor® Mycoplasma qPCR": {
+                name: "Venor® Mycoplasma qPCR",
+                icon: "🔬",
+                tasks: [
+                    { title: "Mix", description: "", status: "pending" },
+                    { title: "IK", description: "", status: "pending" },
+                    { title: "PK", description: "", status: "pending" },
+                    { title: "Wasser", description: "", status: "pending" },
+                    { title: "Qualitätskontrolle", description: "", status: "pending" },
+                    { title: "Labeling", description: "", status: "pending" },
+                    { title: "Packing", description: "", status: "pending" },
+                    { title: "Dokumente schicki + Freigabe", description: "", status: "pending" },
+                    { title: "Abgabe Lager (Prozessende)", description: "", status: "pending" }
+                ]
+            },
+            "QIAcuity E.coli resDNA Kit": {
+                name: "QIAcuity E.coli resDNA Kit",
+                icon: "🧬",
+                tasks: [
+                    { title: "Mix", description: "Warten auf Lieferung", status: "pending" },
+                    { title: "IK", description: "", status: "pending" },
+                    { title: "PK", description: "", status: "pending" },
+                    { title: "Wasser", description: "", status: "pending" },
+                    { title: "Qualitätskontrolle", description: "", status: "pending" },
+                    { title: "Labeling", description: "", status: "pending" },
+                    { title: "Packing", description: "", status: "pending" },
+                    { title: "Dokumente schicki + Freigabe", description: "", status: "pending" },
+                    { title: "Abgabe Lager (Prozessende)", description: "", status: "pending" }
+                ]
+            },
+            "Mynox® Gold": {
+                name: "Mynox® Gold",
+                icon: "🧪",
+                tasks: [
+                    { title: "Herstellung", description: "", status: "pending" },
+                    { title: "Qualitätskontrolle", description: "", status: "pending" },
+                    { title: "Abfüllung", description: "", status: "pending" }
+                ]
+            }
+        };
+
         let products = [
             {
                 name: "Venor® Mycoplasma qPCR",
@@ -279,11 +329,29 @@
         function addProduct() {
             products.push({
                 name: "Neues Produkt",
-                icon: "🏃",
+                icon: "💡",
                 eta: "TBD",
-                tasks: [{ title: "Neue Aufgabe", description: "Beschreibung", status: "pending" }]
+                tasks: [{ title: "Neue Aufgabe", description: "", status: "pending" }]
             });
             renderProducts();
+        }
+
+        function addProductFromTemplate() {
+            const selector = document.getElementById('templateSelector');
+            const templateKey = selector.value;
+            if (templateKey && taskTemplates[templateKey]) {
+                // Deep copy the template to avoid modifying the original
+                const newProduct = JSON.parse(JSON.stringify(taskTemplates[templateKey]));
+                products.push(newProduct);
+                renderProducts();
+            }
+        }
+
+        function populateTemplateSelector() {
+            const selector = document.getElementById('templateSelector');
+            selector.innerHTML = Object.keys(taskTemplates).map(key =>
+                `<option value="${key}">${key}</option>`
+            ).join('');
         }
 
         function deleteProduct(productIndex) {
@@ -309,7 +377,7 @@
             }
         }
 
-        function exportData() {
+        function exportConfig() {
             const config = `const productData = ${JSON.stringify({
                 reportDate: new Date().toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
                 products: products
@@ -323,12 +391,79 @@
             a.click();
         }
 
+        function exportToOutlook() {
+            const reportDate = new Date().toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            const headerHtml = `
+                <div style="font-family: Arial, sans-serif; color: #212529; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center;">
+                    <img alt="Minerva Biolabs Logo" style="height: 48px;" src="https://minerva-biolabs.com/img/mb_logo.svg"/>
+                    <div style="text-align: right;">
+                        <p style="font-weight: 600; font-size: 1.125rem; margin: 0;">${reportDate}</p>
+                        <p style="font-size: 0.875rem; color: #6c757d; margin: 0;">Abteilung Produktion</p>
+                    </div>
+                </div>
+            `;
+
+            const productsHtml = products.map(product => {
+                const progress = calculateProgress(product.tasks);
+                return `
+                    <div style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center;">
+                                <span style="font-size: 1.5rem; margin-right: 0.75rem;">${product.icon}</span>
+                                <h3 style="font-weight: 600; font-size: 1.125rem; margin: 0;">${product.name}</h3>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="font-size: 0.875rem; font-weight: 700; color: #005a2d;">${progress}%</span>
+                                <div style="font-size: 0.75rem; color: #6c757d;">Lieferdatum: ${product.eta}</div>
+                            </div>
+                        </div>
+                        <div style="width: 100%; background-color: #dee2e6; border-radius: 9999px; height: 0.625rem; margin-bottom: 1rem;">
+                            <div style="background-color: #005a2d; height: 0.625rem; border-radius: 9999px; width: ${progress}%;"></div>
+                        </div>
+                        <div>
+                            ${product.tasks.map(task => `
+                                <div style="display: flex; align-items: flex-start; padding: 0.5rem; background-color: #f8f9fa; border-radius: 0.25rem; margin-bottom: 0.25rem; ${task.status === 'pending' ? 'opacity: 0.7;' : ''}">
+                                    <span style="margin-right: 0.5rem; margin-top: 0.125rem; font-size: 0.875rem; color: ${task.status === 'completed' ? '#005a2d' : (task.status === 'in-progress' ? '#ffc107' : '#6c757d')};">
+                                        ${task.status === 'completed' ? '✔' : (task.status === 'in-progress' ? '...' : '○')}
+                                    </span>
+                                    <div>
+                                        <p style="font-weight: 500; font-size: 0.875rem; margin: 0; color: ${task.status === 'pending' ? '#6c757d' : '#212529'};">${task.title}</p>
+                                        ${task.description ? `<p style="font-size: 0.75rem; color: #6c757d; margin: 0;">${task.description}</p>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const emailBody = `
+                <div style="max-width: 800px; margin: auto; padding: 2rem; background-color: #f0f2f5; font-family: Arial, sans-serif;">
+                    ${headerHtml}
+                    <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">Produktfortschritt</h2>
+                    ${productsHtml}
+                </div>
+            `;
+
+            const subject = `Tagesbericht Produktion - ${reportDate}`;
+            const emlContent = `Subject: ${subject}\nContent-Type: text/html; charset=utf-8\n\n${emailBody}`;
+
+            const blob = new Blob([emlContent], { type: 'message/rfc822' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tagesbericht-${new Date().toISOString().slice(0,10)}.eml`;
+            a.click();
+        }
+
         // Initialisierung
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('reportDate').textContent = new Date().toLocaleDateString('de-DE', { 
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
             });
 
+            populateTemplateSelector();
             renderProducts();
         });
     </script>

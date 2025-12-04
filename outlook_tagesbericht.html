@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Täglicher Arbeitsbericht - Produktionsfortschritt</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#8cc63f",
+              "background-light": "#ffffff",
+              "background-dark": "#333333",
+              "surface-light": "#f8f8f8",
+              "surface-dark": "#4a4a4a",
+              "text-light-primary": "#333333",
+              "text-dark-primary": "#f0f0f0",
+              "text-light-secondary": "#666666",
+              "text-dark-secondary": "#b0b0b0",
+              "border-light": "#e0e0e0",
+              "border-dark": "#5a5a5a",
+            },
+            fontFamily: {
+              sans: ["Open Sans", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+        .progress-bar {
+            height: 100%;
+            background-color: #8cc63f;
+            transition: width 1.5s ease-out;
+        }
+    </style>
+    <script>
+        // Konfiguration für Produkte - Hier können Sie Ihre Daten eintragen
+        const productData = {
+            reportDate: "Mittwoch, 3. Dezember 2025",
+            products: [
+                {
+                    name: "Venor® Mycoplasma qPCR",
+                    icon: "🔬",
+                    eta: "Morgen",
+                    tasks: [
+                        { title: "Mix", description: "", status: "completed" },
+                        { title: "IK", description: "", status: "completed" },
+                        { title: "PK", description: "", status: "completed" },
+                        { title: "Wasser", description: "", status: "completed" },
+                        { title: "Qualitätskontrolle", description: "bestanden: 02.12.2025", status: "completed" },
+                        { title: "Labeling", description: "", status: "completed" },
+                        { title: "Packing", description: "", status: "completed" },
+                        { title: "Dokumente schicki + Freigabe", description: "", status: "completed" },
+                        { title: "Abgabe Lager (Prozessende)", description: "", status: "completed" }
+                    ]
+                },
+                {
+                    name: "QIAcuity E.coli resDNA Kit",
+                    icon: "🔬",
+                    eta: "TBD",
+                    tasks: [
+                        { title: "Mix", description: "Warten auf Lieferung", status: "in-progress" },
+                        { title: "IK", description: "", status: "completed" },
+                        { title: "PK", description: "", status: "completed" },
+                        { title: "Wasser", description: "", status: "completed" },
+                        { title: "Qualitätskontrolle", description: "", status: "pending" },
+                        { title: "Labeling", description: "", status: "pending" },
+                        { title: "Packing", description: "", status: "pending" },
+                        { title: "Dokumente schicki + Freigabe", description: "", status: "pending" },
+                        { title: "Abgabe Lager (Prozessende)", description: "", status: "pending" }
+                    ]
+                },
+                {
+                    name: "Mynox® Gold",
+                    icon: "🔬",
+                    eta: "TBD",
+                    tasks: [
+                        { title: "Herstellung", description: "", status: "completed" },
+                        { title: "Qualitätskontrolle", description: "QK bestanden", status: "completed" },
+                        { title: "keine neuen Abfüllungen aus dieser Charge", description: "", status: "pending" }
+                    ]
+                }
+            ]
+        };
+
+        function calculateStats() {
+            const totalProducts = productData.products.length;
+            const completedTasks = productData.products.reduce((sum, product) => 
+                sum + product.tasks.filter(task => task.status === 'completed').length, 0
+            );
+            const totalTasks = productData.products.reduce((sum, product) => sum + product.tasks.length, 0);
+            const avgProgress = totalProducts > 0 ? Math.round(productData.products.reduce((sum, product) => 
+                sum + calculateProgress(product.tasks), 0) / totalProducts) : 0;
+            
+            return { totalProducts, completedTasks, totalTasks, avgProgress };
+        }
+
+        function generateProductHTML() {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
+            
+            productData.products.forEach((product, index) => {
+                const progress = calculateProgress(product.tasks);
+                const productHTML = `
+                    <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg border border-border-light dark:border-border-dark shadow-sm mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-2xl">${product.icon}</span>
+                                <h3 class="font-semibold text-lg">${product.name}</h3>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm font-bold text-primary">${progress}%</span>
+                                <div class="text-xs text-text-light-secondary dark:text-text-dark-secondary">Lieferdatum: ${product.eta}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full bg-border-light dark:bg-border-dark rounded-full h-2.5 mb-4">
+                            <div class="progress-bar h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                        
+                        <div class="space-y-1">
+                            ${product.tasks.map(task => `
+                                <div class="flex items-start p-2 bg-background-light dark:bg-background-dark rounded border border-border-light dark:border-border-dark ${task.status === 'pending' ? 'opacity-60' : ''}">
+                                    <span class="material-icons ${getStatusClass(task.status)} mr-2 mt-0.5 text-sm">${getStatusIcon(task.status)}</span>
+                                    <div>
+                                        <p class="font-medium text-sm ${task.status === 'pending' ? 'text-gray-500' : ''}">${task.title}</p>
+                                        ${task.description && task.description.trim() !== '' && task.description !== 'Beschreibung' ? `<p class="text-xs text-text-light-secondary dark:text-text-dark-secondary ${task.status === 'pending' ? 'text-gray-400' : ''}">${task.description}</p>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += productHTML;
+            });
+            
+            // Fortschrittsbalken animieren
+            setTimeout(() => {
+                const progressBars = document.querySelectorAll('.progress-bar');
+                progressBars.forEach((bar, index) => {
+                    if (productData.products[index]) {
+                        const progress = calculateProgress(productData.products[index].tasks);
+                        setTimeout(() => {
+                            bar.style.width = progress + '%';
+                        }, index * 200);
+                    }
+                });
+            }, 500);
+        }
+        
+        function calculateProgress(tasks) {
+            if (tasks.length === 0) return 0;
+            const completed = tasks.filter(task => task.status === 'completed').length;
+            return Math.round((completed / tasks.length) * 100);
+        }
+
+        function getStatusIcon(status) {
+            switch(status) {
+                case 'completed': return 'check_circle';
+                case 'in-progress': return 'schedule';
+                case 'pending': return 'radio_button_unchecked';
+                default: return 'radio_button_unchecked';
+            }
+        }
+        
+        function getStatusClass(status) {
+            switch(status) {
+                case 'completed': return 'text-primary';
+                case 'in-progress': return 'text-yellow-500';
+                case 'pending': return 'text-text-light-secondary dark:text-text-dark-secondary';
+                default: return 'text-text-light-secondary dark:text-text-dark-secondary';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Datum setzen
+            document.getElementById('reportDate').textContent = productData.reportDate;
+            
+            // Statistiken berechnen und anzeigen
+            const stats = calculateStats();
+            document.getElementById('totalProducts').textContent = stats.totalProducts;
+            document.getElementById('completedTasks').textContent = stats.completedTasks;
+            document.getElementById('totalTasks').textContent = stats.totalTasks;
+            document.getElementById('avgProgress').textContent = stats.avgProgress + '%';
+            
+            // Produkte dynamisch generieren
+            generateProductHTML();
+        });
+    </script>
+</head>
+<body class="font-sans bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary">
+    <div class="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-4 border-b border-border-light dark:border-border-dark">
+            <div class="flex items-center space-x-4 mb-4 sm:mb-0">
+                <img alt="Minerva Biolabs Logo" class="h-12 w-auto" src="https://minerva-biolabs.com/img/mb_logo.svg"/>
+            </div>
+            <div class="text-right">
+                <p class="font-semibold text-lg" id="reportDate">Heute</p>
+                <p class="text-text-light-secondary dark:text-text-dark-secondary">Flo Produktion</p>
+            </div>
+        </header>
+
+        <!-- Statistik-Übersicht -->
+        <section class="mb-8">
+            <h2 class="text-xl font-bold mb-4 pb-2 border-b border-border-light dark:border-border-dark flex items-center">
+                <span class="material-icons mr-2 text-primary">analytics</span>
+                Prozess-Übersicht
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-surface-light dark:bg-surface-dark p-4 rounded-lg border border-border-light dark:border-border-dark text-center">
+                    <div class="text-2xl font-bold text-primary" id="totalProducts">0</div>
+                    <div class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Aktive Prozesse</div>
+                </div>
+                <div class="bg-surface-light dark:bg-surface-dark p-4 rounded-lg border border-border-light dark:border-border-dark text-center">
+                    <div class="text-2xl font-bold text-primary" id="completedTasks">0</div>
+                    <div class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Abgeschlossen</div>
+                </div>
+                <div class="bg-surface-light dark:bg-surface-dark p-4 rounded-lg border border-border-light dark:border-border-dark text-center">
+                    <div class="text-2xl font-bold text-primary" id="totalTasks">0</div>
+                    <div class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Gesamt Aufgaben</div>
+                </div>
+                <div class="bg-surface-light dark:bg-surface-dark p-4 rounded-lg border border-border-light dark:border-border-dark text-center">
+                    <div class="text-2xl font-bold text-primary" id="avgProgress">0%</div>
+                    <div class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Ø Fortschritt</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Produkte werden hier dynamisch eingefügt -->
+        <main>
+            <section class="mb-8">
+                <h2 class="text-xl font-bold mb-4 pb-2 border-b border-border-light dark:border-border-dark flex items-center">
+                    <span class="material-icons mr-2 text-orange-500">settings</span>
+                    Produktfortschritt
+                </h2>
+                <div id="products-container"></div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

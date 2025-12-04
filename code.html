@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Täglicher Arbeitsbericht</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<style>
+        .progress-bar-container {
+            position: relative;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #8cc63f;
+            transition: width 0.3s ease-in-out;
+        }
+    </style>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#8cc63f",
+              "background-light": "#ffffff",
+              "background-dark": "#333333",
+              "surface-light": "#f8f8f8",
+              "surface-dark": "#4a4a4a",
+              "text-light-primary": "#333333",
+              "text-dark-primary": "#f0f0f0",
+              "text-light-secondary": "#666666",
+              "text-dark-secondary": "#b0b0b0",
+              "border-light": "#e0e0e0",
+              "border-dark": "#5a5a5a",
+            },
+            fontFamily: {
+              sans: ["Open Sans", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+            },
+          },
+        },
+      };
+    </script>
+</head>
+<body class="font-sans bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary">
+<div class="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
+<header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-4 border-b border-border-light dark:border-border-dark">
+<div class="flex items-center space-x-4 mb-4 sm:mb-0">
+<img alt="Minerva Biolabs Logo" class="h-16 w-auto" src="https://minerva-biolabs.com/img/mb_logo.svg"/>
+<div>
+<h1 class="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary">Minerva Biolabs</h1>
+<p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Täglicher Arbeitsbericht</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-semibold text-lg">20. Oktober 2023</p>
+<p class="text-text-light-secondary dark:text-text-dark-secondary">Team Biotechnologie</p>
+</div>
+</header>
+<main>
+<section class="mb-8">
+<h2 class="text-xl font-bold mb-4 pb-2 border-b border-border-light dark:border-border-dark flex items-center">
+<span class="material-icons mr-2 text-primary">science</span>
+                    Produktfortschritt
+                </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg border border-border-light dark:border-border-dark shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<h3 class="font-semibold">Venor®GeM qEP</h3>
+<span class="text-sm font-bold text-primary">80%</span>
+</div>
+<p class="text-sm text-text-light-secondary dark:text-text-dark-secondary mb-3">Mycoplasma-Nachweis für Zellkulturen.</p>
+<div class="w-full bg-border-light dark:bg-border-dark rounded-full h-2.5">
+<div class="bg-primary h-2.5 rounded-full" style="width: 80%"></div>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg border border-border-light dark:border-border-dark shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<h3 class="font-semibold">PCR Clean™</h3>
+<span class="text-sm font-bold text-primary">45%</span>
+</div>
+<p class="text-sm text-text-light-secondary dark:text-text-dark-secondary mb-3">Reinigungslösung zur Kontaminationskontrolle.</p>
+<div class="w-full bg-border-light dark:bg-border-dark rounded-full h-2.5">
+<div class="bg-primary h-2.5 rounded-full" style="width: 45%"></div>
+</div>
+</div>
+</div>
+</section>
+<section class="mb-8">
+<h2 class="text-xl font-bold mb-4 pb-2 border-b border-border-light dark:border-border-dark flex items-center">
+<span class="material-icons mr-2 text-primary">task_alt</span>
+                    Abgeschlossene Aufgaben
+                </h2>
+<ul class="space-y-3">
+<li class="flex items-start p-4 bg-surface-light dark:bg-surface-dark rounded-lg border border-border-light dark:border-border-dark">
+<span class="material-icons text-primary mr-3 mt-1">check_circle</span>
+<div>
+<p class="font-semibold">Validierung des Testkits für Charge #A4289</p>
+<p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Alle QC-Parameter erfüllt. Dokumentation abgeschlossen.</p>
+</div>
+</li>
+<li class="flex items-start p-4 bg-surface-light dark:bg-surface-dark rounded-lg border border-border-light dark:border-border-dark">
+<span class="material-icons text-primary mr-3 mt-1">check_circle</span>
+<div>
+<p class="font-semibold">Protokolloptimierung für Mycoplasma-Nachweis</p>
+<p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Inkubationszeit um 15% reduziert bei gleicher Sensitivität.</p>
+</div>
+</li>
+</ul>
+</section>
+<section class="mb-8">
+<h2 class="text-xl font-bold mb-4 pb-2 border-b border-border-light dark:border-border-dark flex items-center">
+<span class="material-icons mr-2 text-primary">double_arrow</span>
+                    Nächste Schritte
+                </h2>
+<ul class="space-y-3">
+<li class="flex items-start p-4 bg-surface-light dark:bg-surface-dark rounded-lg border border-border-light dark:border-border-dark">
+<span class="material-icons text-text-light-secondary dark:text-text-dark-secondary mr-3 mt-1">radio_button_unchecked</span>
+<div>
+<p class="font-semibold">Beginn der Stabilitätsstudie für PCR Clean™</p>
+<p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Probenvorbereitung und Einlagerung bei verschiedenen Temperaturen.</p>
+</div>
+</li>
+<li class="flex items-start p-4 bg-surface-light dark:bg-surface-dark rounded-lg border border-border-light dark:border-border-dark">
+<span class="material-icons text-text-light-secondary dark:text-text-dark-secondary mr-3 mt-1">radio_button_unchecked</span>
+<div>
+<p class="font-semibold">Analyse der Ringversuchsergebnisse 2026</p>
+<p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Datenaggregation und statistische Auswertung.</p>
+</div>
+</li>
+</ul>
+</section>
+<section>
+<h2 class="text-xl font-bold mb-4 pb-2 border-b border-border-light dark:border-border-dark flex items-center">
+<span class="material-icons mr-2 text-red-500">report_problem</span>
+                    Blocker &amp; Herausforderungen
+                </h2>
+<ul class="space-y-3">
+<li class="flex items-start p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-500/30">
+<span class="material-icons text-red-500 mr-3 mt-1">warning</span>
+<div>
+<p class="font-semibold text-red-800 dark:text-red-300">Lieferverzögerung für Reagenz XYZ</p>
+<p class="text-sm text-red-600 dark:text-red-400">Hersteller meldet Produktionsengpass. Voraussichtliche Lieferung in 5 Werktagen. Beeinträchtigt Projekt "Venor®GeM qEP".</p>
+</div>
+</li>
+</ul>
+</section>
+</main>
+<footer class="mt-12 pt-6 border-t border-border-light dark:border-border-dark text-center text-sm text-text-light-secondary dark:text-text-dark-secondary">
+<p>© 2023 Minerva Biolabs GmbH. Alle Rechte vorbehalten.</p>
+<p>Dieser Bericht ist vertraulich und nur für den internen Gebrauch bestimmt.</p>
+</footer>
+</div>
+</body></html>

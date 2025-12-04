@@ -43,7 +43,11 @@
             background-color: #8cc63f;
             transition: width 0.3s ease-in-out;
         }
+        .task-draggable {
+            cursor: move;
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
 <body class="font-sans bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary">
     <div class="fixed top-4 right-4 z-50 space-x-2">
@@ -53,15 +57,10 @@
     </div>
 
     <div class="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
-        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-4 border-b border-border-light dark:border-border-dark">
-            <div class="flex items-center space-x-4 mb-4 sm:mb-0">
-                <img alt="Minerva Biolabs Logo" class="h-12 w-auto" src="https://minerva-biolabs.com/img/mb_logo.svg"/>
-                <h1 class="text-2xl font-semibold text-text-light-primary dark:text-text-dark-primary">Tagesbericht Editor</h1>
-            </div>
-            <div class="text-right">
-                <p class="font-semibold text-lg" id="reportDate">Heute</p>
-                <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Abteilung Produktion</p>
-            </div>
+        <header class="text-center mb-8 pb-4 border-b border-border-light dark:border-border-dark">
+            <img alt="Minerva Biolabs Logo" class="h-12 w-auto mx-auto mb-4" src="https://minerva-biolabs.com/img/mb_logo.svg"/>
+            <h1 class="text-xl font-semibold text-text-light-primary dark:text-text-dark-primary">Täglicher Arbeitsbericht</h1>
+            <p class="text-lg text-text-light-secondary dark:text-text-dark-secondary" id="reportDate">Heute</p>
         </header>
 
         <section class="mb-8">
@@ -76,7 +75,7 @@
                 </div>
                 <div class="bg-surface-light dark:bg-surface-dark p-4 rounded-lg border border-border-light dark:border-border-dark text-center">
                     <div class="text-2xl font-bold text-primary" id="completedTasks">0</div>
-                    <div class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Abgeschlossen</div>
+                    <div class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Abgeschlossene Prozesse</div>
                 </div>
                 <div class="bg-surface-light dark:bg-surface-dark p-4 rounded-lg border border-border-light dark:border-border-dark text-center">
                     <div class="text-2xl font-bold text-primary" id="totalTasks">0</div>
@@ -93,7 +92,7 @@
             <section class="mb-8">
                 <h2 class="text-xl font-bold mb-4 pb-2 border-b border-border-light dark:border-border-dark flex items-center">
                     <span class="material-icons mr-2 text-orange-500">settings</span>
-                    Produktfortschritt
+                    Prozessfortschritt
                 </h2>
                 <div id="products-container"></div>
                 
@@ -111,9 +110,23 @@
                     </div>
                 </div>
             </section>
+            <section class="mt-8">
+                <h2 class="text-xl font-bold mb-4 pb-2 border-b border-border-light dark:border-border-dark flex items-center">
+                    <span class="material-icons mr-2 text-green-500">check_circle</span>
+                    Abgeschlossene Prozesse
+                </h2>
+                <div id="completed-products-container"></div>
+            </section>
         </main>
 
 
+    </div>
+
+    <div id="task-sidebar" class="fixed top-0 right-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg p-4 transform translate-x-full transition-transform duration-300 ease-in-out" style="display: none;">
+        <h3 class="text-lg font-semibold mb-4">Aufgaben-Vorschläge</h3>
+        <div id="task-suggestions-container" class="space-y-2">
+            <!-- Suggestions will be populated by JavaScript -->
+        </div>
     </div>
 
     <script>
@@ -122,7 +135,9 @@
         const taskTemplates = {
             "Venor® Mycoplasma qPCR": {
                 name: "Venor® Mycoplasma qPCR",
-                icon: "🔬",
+                icon: "directions_run",
+                eta: "TBD",
+                chargennummer: "",
                 tasks: [
                     { title: "Mix", description: "", status: "pending" },
                     { title: "IK", description: "", status: "pending" },
@@ -137,7 +152,9 @@
             },
             "QIAcuity E.coli resDNA Kit": {
                 name: "QIAcuity E.coli resDNA Kit",
-                icon: "🧬",
+                icon: "directions_run",
+                eta: "TBD",
+                chargennummer: "",
                 tasks: [
                     { title: "Mix", description: "Warten auf Lieferung", status: "pending" },
                     { title: "IK", description: "", status: "pending" },
@@ -152,7 +169,9 @@
             },
             "Mynox® Gold": {
                 name: "Mynox® Gold",
-                icon: "🧪",
+                icon: "directions_run",
+                eta: "TBD",
+                chargennummer: "",
                 tasks: [
                     { title: "Herstellung", description: "", status: "pending" },
                     { title: "Qualitätskontrolle", description: "", status: "pending" },
@@ -164,8 +183,9 @@
         let products = [
             {
                 name: "Venor® Mycoplasma qPCR",
-                icon: "🏃",
+                icon: "directions_run",
                 eta: "Morgen",
+                chargennummer: "12345",
                 tasks: [
                     { title: "Mix", description: "", status: "completed" },
                     { title: "IK", description: "", status: "completed" },
@@ -180,8 +200,9 @@
             },
             {
                 name: "QIAcuity E.coli resDNA Kit",
-                icon: "🏃",
+                icon: "directions_run",
                 eta: "TBD",
+                chargennummer: "67890",
                 tasks: [
                     { title: "Mix", description: "Warten auf Lieferung", status: "in-progress" },
                     { title: "IK", description: "", status: "completed" },
@@ -193,17 +214,13 @@
                     { title: "Dokumente schicki + Freigabe", description: "", status: "pending" },
                     { title: "Abgabe Lager (Prozessende)", description: "", status: "pending" }
                 ]
-            },
-            {
-                name: "Mynox® Gold",
-                icon: "🏃",
-                eta: "TBD",
-                tasks: [
-                    { title: "Herstellung", description: "", status: "completed" },
-                    { title: "Qualitätskontrolle", description: "QK bestanden", status: "completed" },
-                    { title: "keine neuen Abfüllungen aus dieser Charge", description: "", status: "pending" }
-                ]
             }
+        ];
+        let activeProductForSuggestions = null;
+
+        const suggestedTasks = [
+            "Mix", "IK", "PK", "Wasser", "Qualitätskontrolle", "Labeling", "Packing",
+            "Dokumente schicki + Freigabe", "Abgabe Lager (Prozessende)", "Herstellung", "Abfüllung"
         ];
 
         function calculateProgress(tasks) {
@@ -231,32 +248,60 @@
         }
 
         function updateStats() {
-            const totalProducts = products.length;
-            const completedTasks = products.reduce((sum, product) => 
-                sum + product.tasks.filter(task => task.status === 'completed').length, 0
-            );
+            const activeProducts = products.filter(p => calculateProgress(p.tasks) < 100).length;
+            const completedProducts = products.length - activeProducts;
+
             const totalTasks = products.reduce((sum, product) => sum + product.tasks.length, 0);
-            const avgProgress = totalProducts > 0 ? Math.round(products.reduce((sum, product) => 
-                sum + calculateProgress(product.tasks), 0) / totalProducts) : 0;
+            const avgProgress = products.length > 0 ? Math.round(products.reduce((sum, product) =>
+                sum + calculateProgress(product.tasks), 0) / products.length) : 0;
             
-            document.getElementById('totalProducts').textContent = totalProducts;
-            document.getElementById('completedTasks').textContent = completedTasks;
+            document.getElementById('totalProducts').textContent = activeProducts;
+            document.getElementById('completedTasks').textContent = completedProducts;
             document.getElementById('totalTasks').textContent = totalTasks;
             document.getElementById('avgProgress').textContent = avgProgress + '%';
         }
 
+        function initSortable() {
+            if (!editMode) return;
+            products.forEach((product, productIndex) => {
+                const el = document.getElementById(`tasks-container-${productIndex}`);
+                new Sortable(el, {
+                    animation: 150,
+                    handle: '.task-draggable',
+                    onEnd: function (evt) {
+                        const itemEl = evt.item;
+                        const oldIndex = parseInt(evt.oldIndex);
+                        const newIndex = parseInt(evt.newIndex);
+                        const movedItem = products[productIndex].tasks.splice(oldIndex, 1)[0];
+                        products[productIndex].tasks.splice(newIndex, 0, movedItem);
+                        renderProducts();
+                    },
+                });
+            });
+        }
+
         function renderProducts() {
-            const container = document.getElementById('products-container');
-            container.innerHTML = products.map((product, productIndex) => {
+            const activeProductsContainer = document.getElementById('products-container');
+            const completedProductsContainer = document.getElementById('completed-products-container');
+
+            activeProductsContainer.innerHTML = '';
+            completedProductsContainer.innerHTML = '';
+
+            products.forEach((product, productIndex) => {
                 const progress = calculateProgress(product.tasks);
-                return `
-                    <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg border border-border-light dark:border-border-dark shadow-sm mb-6 ${editMode ? 'ring-2 ring-primary ring-opacity-50' : ''}">
+                const isCompleted = progress === 100;
+
+                const productHtml = `
+                    <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-lg border border-border-light dark:border-border-dark shadow-sm mb-6 ${editMode && !isCompleted ? 'ring-2 ring-primary ring-opacity-50' : ''}">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-3">
-                                ${editMode ? `<input class="w-12 h-8 text-center text-xl border border-border-light rounded" value="${product.icon}" onchange="updateProduct(${productIndex}, 'icon', this.value)">` : `<span class="text-2xl">${product.icon}</span>`}
+                                ${editMode ? `<input class="w-24 h-8 text-center text-sm border border-border-light rounded" value="${product.icon}" onchange="updateProduct(${productIndex}, 'icon', this.value)">` : `<span class="material-icons text-2xl text-primary">${product.icon}</span>`}
                                 ${editMode ? `<input class="font-semibold text-lg bg-transparent border-b border-primary" value="${product.name}" onchange="updateProduct(${productIndex}, 'name', this.value)">` : `<h3 class="font-semibold text-lg">${product.name}</h3>`}
                             </div>
                             <div class="text-right">
+                                <div class="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                                    Chargennummer: ${editMode ? `<input class="w-20 text-xs bg-transparent border-b border-primary" value="${product.chargennummer}" onchange="updateProduct(${productIndex}, 'chargennummer', this.value)">` : product.chargennummer}
+                                </div>
                                 <span class="text-sm font-bold text-primary">${progress}%</span>
                                 <div class="text-xs text-text-light-secondary dark:text-text-dark-secondary">
                                     Lieferdatum: ${editMode ? `<input class="w-20 text-xs bg-transparent border-b border-primary" value="${product.eta}" onchange="updateProduct(${productIndex}, 'eta', this.value)">` : product.eta}
@@ -268,20 +313,20 @@
                             <div class="progress-bar h-2.5 rounded-full" style="width: ${progress}%"></div>
                         </div>
                         
-                        <div class="space-y-1">
+                        <div class="space-y-1" id="tasks-container-${productIndex}">
                             ${product.tasks.map((task, taskIndex) => `
-                                <div class="flex items-start p-2 bg-background-light dark:bg-background-dark rounded border border-border-light dark:border-border-dark ${editMode ? 'ring-1 ring-primary ring-opacity-30' : ''} ${task.status === 'pending' && !editMode ? 'opacity-60' : ''}">
+                                <div class="flex items-start p-2 bg-background-light dark:bg-background-dark rounded border border-border-light dark:border-border-dark ${editMode ? 'ring-1 ring-primary ring-opacity-30 task-draggable' : ''} ${task.status === 'pending' && !editMode ? 'opacity-60' : ''}" data-task-id="${taskIndex}">
                                     <span class="material-icons ${getStatusClass(task.status)} mr-2 mt-0.5 text-sm">${getStatusIcon(task.status)}</span>
                                     <div class="flex-1">
                                         ${editMode ? `<input class="font-medium text-sm w-full bg-transparent border-b border-primary mb-1" value="${task.title}" onchange="updateTask(${productIndex}, ${taskIndex}, 'title', this.value)">` : `<p class="font-medium text-sm ${task.status === 'pending' ? 'text-gray-500' : ''}">${task.title}</p>`}
                                         ${task.description && task.description.trim() !== '' && task.description !== 'Beschreibung' && !editMode ? `<p class="text-xs text-text-light-secondary dark:text-text-dark-secondary ${task.status === 'pending' ? 'text-gray-400' : ''}">${task.description}</p>` : ''}
                                         ${editMode ? `<input class="text-xs text-text-light-secondary dark:text-text-dark-secondary w-full bg-transparent border-b border-gray-300" value="${task.description || ''}" onchange="updateTask(${productIndex}, ${taskIndex}, 'description', this.value)" placeholder="Beschreibung (optional)">` : ''}
                                         ${editMode ? `
-                                            <select class="mt-1 text-xs border border-border-light rounded px-2 py-1" onchange="updateTask(${productIndex}, ${taskIndex}, 'status', this.value)">
-                                                <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>Geplant</option>
-                                                <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>In Arbeit</option>
-                                                <option value="completed" ${task.status === 'completed' ? 'selected' : ''}>Fertig</option>
-                                            </select>
+                                            <div class="mt-2 flex space-x-2">
+                                                <button class="px-2 py-1 text-xs rounded ${task.status === 'pending' ? 'bg-gray-500 text-white' : 'bg-gray-200'}" onclick="updateTask(${productIndex}, ${taskIndex}, 'status', 'pending')">Geplant</button>
+                                                <button class="px-2 py-1 text-xs rounded ${task.status === 'in-progress' ? 'bg-yellow-500 text-white' : 'bg-yellow-100'}" onclick="updateTask(${productIndex}, ${taskIndex}, 'status', 'in-progress')">In Arbeit</button>
+                                                <button class="px-2 py-1 text-xs rounded ${task.status === 'completed' ? 'bg-green-500 text-white' : 'bg-green-100'}" onclick="updateTask(${productIndex}, ${taskIndex}, 'status', 'completed')">Fertig</button>
+                                            </div>
                                         ` : ''}
                                     </div>
                                     ${editMode ? `
@@ -296,6 +341,9 @@
                                     <button class="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-green-600" onclick="addTask(${productIndex})">
                                         <span class="material-icons text-sm mr-1">add</span>Aufgabe
                                     </button>
+                                    <button class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600" onclick="openTaskSuggestions(${productIndex})">
+                                        <span class="material-icons text-sm mr-1">lightbulb</span>Vorschläge
+                                    </button>
                                     <button class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600" onclick="deleteProduct(${productIndex})">
                                         <span class="material-icons text-sm mr-1">delete</span>Produkt löschen
                                     </button>
@@ -304,16 +352,53 @@
                         </div>
                     </div>
                 `;
-            }).join('');
+
+                if (isCompleted) {
+                    completedProductsContainer.innerHTML += productHtml;
+                } else {
+                    activeProductsContainer.innerHTML += productHtml;
+                }
+            });
             
             updateStats();
+            setTimeout(initSortable, 0);
         }
 
         function toggleMode() {
             editMode = !editMode;
             document.getElementById('modeBtn').textContent = editMode ? '👁️ Vorschau' : '✏️ Bearbeiten';
             document.getElementById('addProductSection').style.display = editMode ? 'block' : 'none';
+            const sidebar = document.getElementById('task-sidebar');
+            if (editMode) {
+                sidebar.style.display = 'block';
+                setTimeout(() => sidebar.classList.remove('translate-x-full'), 10);
+            } else {
+                sidebar.classList.add('translate-x-full');
+                setTimeout(() => sidebar.style.display = 'none', 300);
+            }
             renderProducts();
+        }
+
+        function renderTaskSuggestions() {
+            const container = document.getElementById('task-suggestions-container');
+            container.innerHTML = suggestedTasks.map(taskTitle => `
+                <button class="w-full text-left bg-gray-200 dark:bg-gray-700 p-2 rounded hover:bg-primary hover:text-white" onclick="addTaskFromSuggestion('${taskTitle}')">
+                    ${taskTitle}
+                </button>
+            `).join('');
+        }
+
+        function openTaskSuggestions(productIndex) {
+            activeProductForSuggestions = productIndex;
+            renderTaskSuggestions();
+        }
+
+        function addTaskFromSuggestion(title) {
+            if (activeProductForSuggestions !== null) {
+                addTask(activeProductForSuggestions, title);
+            } else {
+                alert("Bitte wählen Sie zuerst ein Produkt aus, dem Sie eine Aufgabe hinzufügen möchten.");
+            }
         }
 
         function updateProduct(productIndex, field, value) {
@@ -329,8 +414,9 @@
         function addProduct() {
             products.push({
                 name: "Neues Produkt",
-                icon: "💡",
+                icon: "directions_run",
                 eta: "TBD",
+                chargennummer: "",
                 tasks: [{ title: "Neue Aufgabe", description: "", status: "pending" }]
             });
             renderProducts();
@@ -361,10 +447,10 @@
             }
         }
 
-        function addTask(productIndex) {
+        function addTask(productIndex, title = "Neue Aufgabe") {
             products[productIndex].tasks.push({
-                title: "Neue Aufgabe",
-                description: "Beschreibung",
+                title: title,
+                description: "",
                 status: "pending"
             });
             renderProducts();
@@ -395,46 +481,73 @@
             const reportDate = new Date().toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
             const headerHtml = `
-                <div style="font-family: Arial, sans-serif; color: #212529; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center;">
-                    <img alt="Minerva Biolabs Logo" style="height: 48px;" src="https://minerva-biolabs.com/img/mb_logo.svg"/>
-                    <div style="text-align: right;">
-                        <p style="font-weight: 600; font-size: 1.125rem; margin: 0;">${reportDate}</p>
-                        <p style="font-size: 0.875rem; color: #6c757d; margin: 0;">Abteilung Produktion</p>
-                    </div>
-                </div>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="font-family: Arial, sans-serif; color: #212529; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #dee2e6;">
+                    <tr>
+                        <td>
+                            <img alt="Minerva Biolabs Logo" style="height: 48px;" src="https://minerva-biolabs.com/img/mb_logo.svg"/>
+                        </td>
+                        <td align="right" style="text-align: right;">
+                            <p style="font-weight: 600; font-size: 1.125rem; margin: 0;">${reportDate}</p>
+                            <p style="font-size: 0.875rem; color: #6c757d; margin: 0;">Abteilung Produktion</p>
+                        </td>
+                    </tr>
+                </table>
             `;
 
             const productsHtml = products.map(product => {
                 const progress = calculateProgress(product.tasks);
                 return `
-                    <div style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-                            <div style="display: flex; align-items: center;">
-                                <span style="font-size: 1.5rem; margin-right: 0.75rem;">${product.icon}</span>
-                                <h3 style="font-weight: 600; font-size: 1.125rem; margin: 0;">${product.name}</h3>
-                            </div>
-                            <div style="text-align: right;">
-                                <span style="font-size: 0.875rem; font-weight: 700; color: #005a2d;">${progress}%</span>
-                                <div style="font-size: 0.75rem; color: #6c757d;">Lieferdatum: ${product.eta}</div>
-                            </div>
-                        </div>
-                        <div style="width: 100%; background-color: #dee2e6; border-radius: 9999px; height: 0.625rem; margin-bottom: 1rem;">
-                            <div style="background-color: #005a2d; height: 0.625rem; border-radius: 9999px; width: ${progress}%;"></div>
-                        </div>
-                        <div>
-                            ${product.tasks.map(task => `
-                                <div style="display: flex; align-items: flex-start; padding: 0.5rem; background-color: #f8f9fa; border-radius: 0.25rem; margin-bottom: 0.25rem; ${task.status === 'pending' ? 'opacity: 0.7;' : ''}">
-                                    <span style="margin-right: 0.5rem; margin-top: 0.125rem; font-size: 0.875rem; color: ${task.status === 'completed' ? '#005a2d' : (task.status === 'in-progress' ? '#ffc107' : '#6c757d')};">
-                                        ${task.status === 'completed' ? '✔' : (task.status === 'in-progress' ? '...' : '○')}
-                                    </span>
-                                    <div>
-                                        <p style="font-weight: 500; font-size: 0.875rem; margin: 0; color: ${task.status === 'pending' ? '#6c757d' : '#212529'};">${task.title}</p>
-                                        ${task.description ? `<p style="font-size: 0.75rem; color: #6c757d; margin: 0;">${task.description}</p>` : ''}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+                        <tr>
+                            <td style="padding: 1.5rem;">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 1rem;">
+                                    <tr>
+                                        <td width="50" valign="top">
+                                            <span style="font-size: 1.5rem; margin-right: 0.75rem; font-family: 'Material Icons';">${product.icon}</span>
+                                        </td>
+                                        <td>
+                                            <h3 style="font-weight: 600; font-size: 1.125rem; margin: 0;">${product.name}</h3>
+                                        </td>
+                                        <td align="right" style="text-align: right;">
+                                            <div style="font-size: 0.75rem; color: #6c757d;">Chargennummer: ${product.chargennummer}</div>
+                                            <span style="font-size: 0.875rem; font-weight: 700; color: #005a2d;">${progress}%</span>
+                                            <div style="font-size: 0.75rem; color: #6c757d;">Lieferdatum: ${product.eta}</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 1rem;">
+                                    <tr>
+                                        <td>
+                                            <div style="width: 100%; background-color: #dee2e6; border-radius: 9999px; height: 0.625rem;">
+                                                <div style="background-color: #005a2d; height: 0.625rem; border-radius: 9999px; width: ${progress}%;"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                    ${product.tasks.map(task => `
+                                        <tr>
+                                            <td style="padding: 0.5rem; background-color: #f8f9fa; border-radius: 0.25rem; border-bottom: 1px solid #ffffff; ${task.status === 'pending' ? 'opacity: 0.7;' : ''}">
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                    <tr>
+                                                        <td width="20" valign="top">
+                                                            <span style="margin-right: 0.5rem; font-size: 0.875rem; color: ${task.status === 'completed' ? '#005a2d' : (task.status === 'in-progress' ? '#ffc107' : '#6c757d')};">
+                                                                ${task.status === 'completed' ? '✔' : (task.status === 'in-progress' ? '...' : '○')}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <p style="font-weight: 500; font-size: 0.875rem; margin: 0; color: ${task.status === 'pending' ? '#6c757d' : '#212529'};">${task.title}</p>
+                                                            ${task.description ? `<p style="font-size: 0.75rem; color: #6c757d; margin: 0;">${task.description}</p>` : ''}
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
                 `;
             }).join('');
 
@@ -447,7 +560,7 @@
             `;
 
             const subject = `Tagesbericht Produktion - ${reportDate}`;
-            const emlContent = `Subject: ${subject}\nContent-Type: text/html; charset=utf-8\n\n${emailBody}`;
+            const emlContent = `To: n.ruf@minerva-biolabs.com\nSubject: ${subject}\nContent-Type: text/html; charset=utf-8\n\n${emailBody}`;
 
             const blob = new Blob([emlContent], { type: 'message/rfc822' });
             const url = URL.createObjectURL(blob);
@@ -464,6 +577,7 @@
             });
 
             populateTemplateSelector();
+            renderTaskSuggestions();
             renderProducts();
         });
     </script>
